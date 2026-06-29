@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Serif } from "next/font/google";
 import { TRPCProvider } from "@/lib/trpc/Provider";
+import { AuthProvider } from "@/lib/auth-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -51,7 +52,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${notoSerif.variable}`}>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <TRPCProvider>{children}</TRPCProvider>
+        <AuthProvider>
+          <TRPCProvider>{children}</TRPCProvider>
+        </AuthProvider>
       </body>
     </html>
   );

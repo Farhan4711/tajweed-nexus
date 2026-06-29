@@ -78,12 +78,12 @@ The project is being implemented in 5 distinct phases:
 - [x] tRPC API Layer setup
 - [x] Design System & Shared Components (Tailwind, shadcn/ui)
 
-### Phase 2: Public Website
-- [ ] Home Page
-- [ ] Courses Listing & Detail Pages
-- [ ] Teachers Listing & Profile Pages
-- [ ] Blog System
-- [ ] About, Pricing, & Contact Pages
+### Phase 2: Public Website (Completed)
+- [x] Home Page
+- [x] Courses Listing & Detail Pages
+- [x] Teachers Listing & Profile Pages
+- [x] Blog System
+- [x] About, Pricing, & Contact Pages
 
 ### Phase 3: Core Platform Services
 - [ ] File Upload System (Cloudflare R2 / AWS S3)
