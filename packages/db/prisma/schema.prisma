@@ -1,0 +1,513 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────
+// ENUMS
+// ──────────────────────────────────────────────
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum CourseType {
+  QURAN_READING
+  TAJWEED
+  HIFZ
+  ARABIC_LANGUAGE
+  ISLAMIC_STUDIES
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum EvaluationType {
+  READING
+  TARTEEL
+  HIFZ
+}
+
+enum ArabicGrade {
+  MUMTAZ        // ممتاز — Excellent
+  JAYYID_JIDDAN // جيد جداً — Very Good
+  JAYYID        // جيد — Good
+  MAQBOOL       // مقبول — Acceptable
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+}
+
+enum BlogCategory {
+  QURAN_LEARNING_TIPS
+  ISLAMIC_ARTICLES
+  TEACHER_SPOTLIGHT
+  STUDENT_STORIES
+  NEWS
+}
+
+// ──────────────────────────────────────────────
+// USER & PROFILES
+// ──────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          Role      @default(STUDENT)
+  avatar        String?
+  phone         String?
+  country       String?
+  isActive      Boolean   @default(true)
+  emailVerified DateTime?
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  teacherProfile  TeacherProfile?
+  studentProfile  StudentProfile?
+  enrollments     Enrollment[]
+  teachingSessions ClassSession[]    @relation("TeacherSessions")
+  attendances     Attendance[]
+  evaluationsGiven  Evaluation[]     @relation("EvaluationsGiven")
+  evaluationsReceived Evaluation[]   @relation("EvaluationsReceived")
+  evaluationsApproved Evaluation[]   @relation("EvaluationsApproved")
+  assignmentsCreated Assignment[]
+  submissions     Submission[]
+  payments        Payment[]
+  blogPosts       BlogPost[]
+  notifications   Notification[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model TeacherProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  bio             String?  @db.Text
+  specialisations String[] @default([])
+  ijazahCerts     String[] @default([])  // URLs to certificate scans
+  videoIntroUrl   String?
+  yearsExperience Int      @default(0)
+  rating          Float    @default(0)
+  totalRatings    Int      @default(0)
+  studentCount    Int      @default(0)
+  isApproved      Boolean  @default(false)
+  availableSlots  Json?    // JSON array of available time slots
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses Course[] @relation("CourseTeachers")
+
+  @@map("teacher_profiles")
+}
+
+model StudentProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  guardianName  String?
+  guardianPhone String?
+  guardianEmail String?
+  dateOfBirth   DateTime?
+  timezone      String    @default("UTC")
+  currentLevel  CourseLevel @default(BEGINNER)
+  currentSurah  String?     // Current Quran position
+  currentJuz    Int?        // Current Juz for Hifz tracking
+  totalJuzMemorised Int   @default(0)
+  streak        Int       @default(0) // Consecutive days attended
+  lastAttendedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("student_profiles")
+}
+
+// ──────────────────────────────────────────────
+// COURSES & ENROLLMENT
+// ──────────────────────────────────────────────
+
+model Course {
+  id           String      @id @default(cuid())
+  title        String
+  slug         String      @unique
+  description  String?     @db.Text
+  type         CourseType
+  level        CourseLevel
+  price        Float       @default(0)
+  currency     String      @default("USD")
+  duration     String?     // e.g. "3 months", "6 weeks"
+  thumbnail    String?
+  isPublished  Boolean     @default(false)
+  isFeatured   Boolean     @default(false)
+  enrolledCount Int        @default(0)
+  rating       Float       @default(0)
+  totalRatings Int         @default(0)
+  curriculum   Json?       // JSON structure for modules/lessons
+  learningOutcomes String[] @default([])
+  language     String      @default("English")
+  publishedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  teachers    TeacherProfile[] @relation("CourseTeachers")
+  enrollments Enrollment[]
+  sessions    ClassSession[]
+  evaluations Evaluation[]
+  assignments Assignment[]
+
+  @@index([slug])
+  @@index([type])
+  @@index([level])
+  @@index([isPublished])
+  @@map("courses")
+}
+
+model Enrollment {
+  id         String           @id @default(cuid())
+  studentId  String
+  courseId   String
+  status     EnrollmentStatus @default(ACTIVE)
+  startDate  DateTime         @default(now())
+  endDate    DateTime?
+  paidAmount Float            @default(0)
+  progress   Float            @default(0) // 0-100 percentage
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  // Relations
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+  @@index([status])
+  @@map("enrollments")
+}
+
+// ──────────────────────────────────────────────
+// CLASS SESSIONS & ATTENDANCE
+// ──────────────────────────────────────────────
+
+model ClassSession {
+  id            String        @id @default(cuid())
+  courseId      String
+  teacherId     String
+  title         String?
+  scheduledAt   DateTime
+  duration      Int           @default(60) // minutes
+  dailyRoomUrl  String?
+  dailyRoomName String?
+  recordingUrl  String?
+  status        SessionStatus @default(SCHEDULED)
+  isRecurring   Boolean       @default(false)
+  recurringRule String?       // e.g. "WEEKLY:MON,WED,FRI"
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher     User         @relation("TeacherSessions", fields: [teacherId], references: [id])
+  attendances Attendance[]
+
+  @@index([courseId])
+  @@index([teacherId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("class_sessions")
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  sessionId String
+  studentId String
+  status    AttendanceStatus @default(PRESENT)
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  // Relations
+  session ClassSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+  @@index([sessionId])
+  @@map("attendances")
+}
+
+// ──────────────────────────────────────────────
+// EVALUATIONS & GRADING
+// ──────────────────────────────────────────────
+
+model Evaluation {
+  id             String         @id @default(cuid())
+  studentId      String
+  teacherId      String
+  courseId        String
+  type           EvaluationType
+  date           DateTime       @default(now())
+  scores         Json           // Structured scores per evaluation type
+  overallGrade   ArabicGrade
+  teacherComment String?        @db.Text
+  approvedById   String?
+  approvedAt     DateTime?
+  isApproved     Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  student    User   @relation("EvaluationsReceived", fields: [studentId], references: [id], onDelete: Cascade)
+  teacher    User   @relation("EvaluationsGiven", fields: [teacherId], references: [id])
+  course     Course @relation(fields: [courseId], references: [id])
+  approvedBy User?  @relation("EvaluationsApproved", fields: [approvedById], references: [id])
+
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([courseId])
+  @@index([type])
+  @@map("evaluations")
+}
+
+// ──────────────────────────────────────────────
+// ASSIGNMENTS & SUBMISSIONS
+// ──────────────────────────────────────────────
+
+model Assignment {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  courseId     String
+  teacherId   String
+  dueAt       DateTime?
+  attachments String[] @default([]) // URLs to attached files
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher     User         @relation(fields: [teacherId], references: [id])
+  submissions Submission[]
+
+  @@index([courseId])
+  @@index([teacherId])
+  @@index([dueAt])
+  @@map("assignments")
+}
+
+model Submission {
+  id           String    @id @default(cuid())
+  assignmentId String
+  studentId    String
+  content      String?   @db.Text
+  files        String[]  @default([]) // URLs to submitted files
+  submittedAt  DateTime  @default(now())
+  grade        String?
+  feedback     String?   @db.Text
+  gradedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
+  @@map("submissions")
+}
+
+// ──────────────────────────────────────────────
+// PAYMENTS
+// ──────────────────────────────────────────────
+
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  amount          Float
+  currency        String        @default("USD")
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?       @unique
+  stripeCustomerId String?
+  invoiceUrl      String?
+  description     String?
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripePaymentId])
+  @@map("payments")
+}
+
+// ──────────────────────────────────────────────
+// BLOG
+// ──────────────────────────────────────────────
+
+model BlogPost {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  excerpt     String?      @db.Text
+  content     Json         // Tiptap JSON content
+  authorId    String
+  category    BlogCategory
+  thumbnail   String?
+  tags        String[]     @default([])
+  isPublished Boolean      @default(false)
+  readingTime Int          @default(5) // minutes
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([slug])
+  @@index([category])
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
+
+// ──────────────────────────────────────────────
+// NOTIFICATIONS
+// ──────────────────────────────────────────────
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  type      String              // e.g., "class_reminder", "evaluation_result"
+  title     String
+  body      String              @db.Text
+  isRead    Boolean             @default(false)
+  channel   NotificationChannel @default(IN_APP)
+  metadata  Json?
+  createdAt DateTime            @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ──────────────────────────────────────────────
+// AUDIT LOG (for admin actions)
+// ──────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // e.g., "user.create", "course.update"
+  entity    String   // e.g., "User", "Course"
+  entityId  String
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ──────────────────────────────────────────────
+// CONTACT FORM SUBMISSIONS
+// ──────────────────────────────────────────────
+
+model ContactSubmission {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  country     String?
+  message     String   @db.Text
+  inquiryType String?  // e.g., "enrollment", "support", "partnership"
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("contact_submissions")
+}
+
+// ──────────────────────────────────────────────
+// TESTIMONIALS (for public site)
+// ──────────────────────────────────────────────
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  country   String?
+  avatar    String?
+  rating    Int      @default(5) // 1-5
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("testimonials")
+}

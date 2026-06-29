@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Q.LMS Design Tokens ───────────────────── */
+    /* Primary Green (Islamic Green #1B6B3A) */
+    --primary: 147 58% 26%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary Gold (#C8963E) */
+    --secondary: 37 53% 51%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Background / Surface */
+    --background: 140 25% 97%;
+    --foreground: 150 30% 8%;
+
+    /* Cards and Surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 150 30% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 30% 8%;
+
+    /* Muted / Subtle */
+    --muted: 140 15% 93%;
+    --muted-foreground: 150 10% 40%;
+
+    /* Accent */
+    --accent: 140 15% 93%;
+    --accent-foreground: 150 30% 8%;
+
+    /* Borders */
+    --border: 140 10% 88%;
+    --input: 140 10% 88%;
+    --ring: 147 58% 26%;
+
+    /* Semantic Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 72% 29%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Radius */
+    --radius: 0.625rem;
+
+    /* Chart Colors */
+    --chart-1: 147 58% 26%;
+    --chart-2: 37 53% 51%;
+    --chart-3: 142 72% 29%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 84% 60%;
+  }
+
+  .dark {
+    /* Dark Mode */
+    --background: 150 30% 5%;
+    --foreground: 140 10% 95%;
+
+    --card: 150 25% 8%;
+    --card-foreground: 140 10% 95%;
+    --popover: 150 25% 8%;
+    --popover-foreground: 140 10% 95%;
+
+    --primary: 147 58% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 37 53% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 150 20% 15%;
+    --muted-foreground: 140 10% 60%;
+
+    --accent: 150 20% 15%;
+    --accent-foreground: 140 10% 95%;
+
+    --border: 150 15% 18%;
+    --input: 150 15% 18%;
+    --ring: 147 58% 40%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 72% 40%;
+    --warning: 38 92% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-noto-serif), serif;
+  }
+}
+
+/* ── Custom Scrollbar ──────────────────────────── */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+/* ── Islamic Pattern Background ─────────────────── */
+.islamic-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231B6B3A' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
