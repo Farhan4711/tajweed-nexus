@@ -1,6 +1,6 @@
-// ──────────────────────────────────────────────
-// Q.LMS Shared UI Components
-// ──────────────────────────────────────────────
-// Components will be added as we build the design system in Phase 1.5
-
-export {};
+export * from "./lib/utils";
+export * from "./components/ui/button";
+export * from "./components/ui/input";
+export * from "./components/ui/label";
+export * from "./components/ui/card";
+export * from "./components/ui/form";

@@ -1,11 +1,10 @@
 import { PrismaClient, Role, CourseType, CourseLevel, EnrollmentStatus, EvaluationType, ArabicGrade, BlogCategory } from '@prisma/client';
-import * as crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 function hashPassword(password: string): string {
-  // Simple mock hash for seed data
-  return crypto.createHash('sha256').update(password).digest('hex');
+  return bcrypt.hashSync(password, 10);
 }
 
 async function main() {
@@ -14,7 +13,7 @@ async function main() {
   // ── 1. Create Super Admin ──────────────────────
   const superadmin = await prisma.user.upsert({
     where: { email: 'admin@qlms.com' },
-    update: {},
+    update: { passwordHash: hashPassword('admin123') },
     create: {
       email: 'admin@qlms.com',
       passwordHash: hashPassword('admin123'),
@@ -38,7 +37,7 @@ async function main() {
   for (const t of teachersData) {
     const user = await prisma.user.upsert({
       where: { email: t.email },
-      update: {},
+      update: { passwordHash: hashPassword('teacher123') },
       create: {
         email: t.email,
         passwordHash: hashPassword('teacher123'),
@@ -109,7 +108,7 @@ async function main() {
   for (let i = 1; i <= 15; i++) {
     const user = await prisma.user.upsert({
       where: { email: `student${i}@qlms.com` },
-      update: {},
+      update: { passwordHash: hashPassword('student123') },
       create: {
         email: `student${i}@qlms.com`,
         passwordHash: hashPassword('student123'),
@@ -127,8 +126,15 @@ async function main() {
     students.push(user);
 
     // Enroll in 1 or 2 random courses
-    await prisma.enrollment.create({
-      data: {
+    await prisma.enrollment.upsert({
+      where: {
+        studentId_courseId: {
+          studentId: user.id,
+          courseId: courses[i % courses.length].id,
+        }
+      },
+      update: {},
+      create: {
         studentId: user.id,
         courseId: courses[i % courses.length].id,
         status: EnrollmentStatus.ACTIVE,

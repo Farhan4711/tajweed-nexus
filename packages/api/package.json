@@ -1,0 +1,22 @@
+{
+  "name": "@qlms/api",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@qlms/db": "*",
+    "@qlms/types": "*",
+    "@trpc/server": "^10.45.2",
+    "superjson": "^2.2.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@qlms/config": "*",
+    "typescript": "^5.5.0"
+  }
+}
