@@ -18,7 +18,7 @@ const navLinks = [
 ];
 
 export function PublicHeader() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const isLoading = status === "loading";
   const isLoggedIn = status === "authenticated";
 

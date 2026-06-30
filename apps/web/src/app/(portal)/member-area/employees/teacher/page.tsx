@@ -10,6 +10,10 @@ export default function TeacherDashboard() {
 
   if (isLoading) return <div className="p-4 text-sm">Loading teacher profile...</div>;
 
+  // Bug fix: operator precedence — `!upcomingSessions || upcomingSessions.length <= 1` 
+  // must be wrapped in parens to evaluate correctly as a JSX condition
+  const hasMoreSessions = upcomingSessions && upcomingSessions.length > 1;
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-end">
@@ -25,7 +29,7 @@ export default function TeacherDashboard() {
           { label: "Hours Taught", value: "142", icon: Clock },
           { label: "Active Students", value: "28", icon: Users },
           { label: "Avg. Rating", value: "4.9", icon: Star },
-          { label: "Classes Today", value: upcomingSessions?.length || 0, icon: Video },
+          { label: "Classes Today", value: upcomingSessions?.length ?? 0, icon: Video },
         ].map((kpi, i) => (
           <div key={i} className="bg-white p-4 rounded-lg border border-zinc-200 shadow-sm flex items-center justify-between">
             <div>
@@ -57,8 +61,9 @@ export default function TeacherDashboard() {
                 </p>
                 <a 
                   href={upcomingSessions[0].zoomUrl || "#"} 
-                  target="_blank" 
-                  className="mt-6 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md text-sm transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md text-sm transition-colors text-center"
                 >
                   Join Zoom Room
                 </a>
@@ -89,21 +94,22 @@ export default function TeacherDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {upcomingSessions?.slice(1, 6).map((session) => (
-                    <tr key={session.id} className="hover:bg-zinc-50">
-                      <td className="px-4 py-2 text-zinc-900 font-medium">
-                        {new Date(session.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="px-4 py-2 text-zinc-700">{session.title || "Class"}</td>
-                      <td className="px-4 py-2 text-zinc-500 text-xs">{session.duration} min</td>
-                      <td className="px-4 py-2">
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                          {session.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                  {!upcomingSessions || upcomingSessions.length <= 1 && (
+                  {hasMoreSessions ? (
+                    upcomingSessions.slice(1, 6).map((session) => (
+                      <tr key={session.id} className="hover:bg-zinc-50">
+                        <td className="px-4 py-2 text-zinc-900 font-medium">
+                          {new Date(session.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="px-4 py-2 text-zinc-700">{session.title || "Class"}</td>
+                        <td className="px-4 py-2 text-zinc-500 text-xs">{session.duration} min</td>
+                        <td className="px-4 py-2">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                            {session.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
                       <td colSpan={4} className="px-4 py-8 text-center text-zinc-500 text-sm">
                         No upcoming sessions to display.

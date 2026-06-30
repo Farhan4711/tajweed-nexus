@@ -5,7 +5,7 @@ import { Users, UserCheck, Calendar, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export default function InstituteAdminDashboard() {
-  const { data: user, isLoading } = trpc.user.me.useQuery();
+  const { isLoading } = trpc.user.me.useQuery();
 
   if (isLoading) return <div className="p-4 text-sm">Loading institute admin profile...</div>;
 

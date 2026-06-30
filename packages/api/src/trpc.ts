@@ -7,7 +7,7 @@ import { UserRole } from "@qlms/types";
 export type Context = {
   user?: {
     id: string;
-    email: string;
+    email?: string | null; // NextAuth email can be null/undefined
     role: UserRole;
   } | null;
   db: typeof db;
@@ -27,10 +27,12 @@ const t = initTRPC.context<Context>().create({
   },
 });
 
+export const createTRPCRouter = t.router;
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-// Reusable middleware to ensure user is logged in
+// Reusable middleware to ensure user is logged in.
+// Critically, we must forward `db` alongside `user` in the next context.
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -38,13 +40,14 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   return next({
     ctx: {
       user: ctx.user,
+      db: ctx.db, // ← Bug fix: forward db into protected context
     },
   });
 });
 
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 
-// Example of a role-specific middleware
+// Role-specific middleware for Super Admin actions
 const enforceUserIsSuperAdmin = t.middleware(({ ctx, next }) => {
   if (!ctx.user || ctx.user.role !== "SUPERADMIN") {
     throw new TRPCError({ code: "FORBIDDEN" });
@@ -52,6 +55,7 @@ const enforceUserIsSuperAdmin = t.middleware(({ ctx, next }) => {
   return next({
     ctx: {
       user: ctx.user,
+      db: ctx.db, // ← Bug fix: forward db into super admin context
     },
   });
 });

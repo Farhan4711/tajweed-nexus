@@ -55,11 +55,12 @@ export default function StudentDashboard() {
                 <p className="text-sm text-zinc-500 mt-1">
                   {new Date(upcomingSessions[0].scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
-                <p className="text-xs text-zinc-400 mt-2">with {upcomingSessions[0].teacher?.name}</p>
+                <p className="text-xs text-zinc-400 mt-2">with {(upcomingSessions[0] as { teacher?: { name?: string | null } }).teacher?.name}</p>
                 <a 
                   href={upcomingSessions[0].zoomUrl || "#"} 
                   target="_blank" 
-                  className="mt-6 w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-md text-sm transition-colors"
+                  rel="noopener noreferrer"
+                  className="mt-6 w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-md text-sm transition-colors text-center"
                 >
                   Join Zoom Room
                 </a>

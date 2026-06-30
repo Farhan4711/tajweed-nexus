@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Avatar, AvatarFallback, AvatarImage } from "@qlms/ui";
+import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Avatar, AvatarFallback } from "@qlms/ui";
 import { BookOpen, Users, Globe, Award, CheckCircle2, Star } from "lucide-react";
 
 const fadeIn = {
@@ -188,7 +188,7 @@ export default function HomePage() {
                   <div className="flex gap-1 text-gold">
                     {[...Array(5)].map((_, j) => <Star key={j} className="h-4 w-4 fill-current" />)}
                   </div>
-                  <p className="text-foreground italic leading-relaxed">"{test.text}"</p>
+                  <p className="text-foreground italic leading-relaxed">&ldquo;{test.text}&rdquo;</p>
                   <div className="flex items-center gap-3 pt-4 border-t border-border/50">
                     <Avatar>
                       <AvatarFallback className="bg-islamic-green/10 text-islamic-green font-semibold">

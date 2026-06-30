@@ -15,6 +15,7 @@ export const authConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.avatar = user.avatar; // Bug fix: persist avatar in JWT
       }
       return token;
     },
@@ -22,6 +23,7 @@ export const authConfig = {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as UserRole;
+        session.user.avatar = token.avatar as string | null | undefined; // Bug fix: expose avatar in session
       }
       return session;
     },

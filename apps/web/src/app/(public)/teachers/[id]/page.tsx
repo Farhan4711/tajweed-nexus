@@ -1,8 +1,8 @@
 import { db } from "@qlms/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Badge, Avatar, AvatarFallback, AvatarImage, Card, CardContent, Button } from "@qlms/ui";
-import { Star, MapPin, BookOpen, Clock, Users, ChevronRight, Award, GraduationCap } from "lucide-react";
+import { Badge, Avatar, AvatarFallback, AvatarImage, Card, Button } from "@qlms/ui";
+import { Star, MapPin, Clock, Users, ChevronRight, Award } from "lucide-react";
 
 interface TeacherPageProps {
   params: {
@@ -130,7 +130,7 @@ export default async function TeacherDetailPage({ params }: TeacherPageProps) {
                 <div className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/20">
                   <Award className="h-6 w-6 text-gold shrink-0" />
                   <div>
-                    <p className="font-medium">Ijazah in Hafs 'an 'Asim</p>
+                    <p className="font-medium">Ijazah in Hafs &apos;an &apos;Asim</p>
                     <p className="text-xs text-muted-foreground">Verified Certification</p>
                   </div>
                 </div>

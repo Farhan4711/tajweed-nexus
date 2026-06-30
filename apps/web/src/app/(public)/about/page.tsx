@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Card, CardContent } from "@qlms/ui";
 import { BookOpen, Globe2, Users2, Target } from "lucide-react";
 

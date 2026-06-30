@@ -6,24 +6,20 @@ import { UserRole } from "@qlms/types";
 import { authConfig } from "./auth.config";
 
 // Extending the built-in session types
+// Note: In NextAuth v5, JWT type augmentation goes through the same "next-auth" module
 declare module "next-auth" {
   interface Session {
     user: {
       id: string;
       role: UserRole;
+      avatar?: string | null;
     } & DefaultSession["user"];
   }
 
   interface User {
     id: string;
     role: UserRole;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    role: UserRole;
+    avatar?: string | null;
   }
 }
 
@@ -65,6 +61,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: user.name,
           role: user.role as UserRole,
+          avatar: user.avatar ?? null,
         };
       },
     }),

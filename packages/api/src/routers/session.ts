@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { Role } from "@qlms/types";
 
 export const sessionRouter = createTRPCRouter({
   // Get sessions for a specific course
@@ -18,14 +17,15 @@ export const sessionRouter = createTRPCRouter({
     }),
 
   // Get my upcoming sessions (as student or teacher)
+  // Bug fix: was incorrectly accessing ctx.session.user — context only has ctx.user
   getMyUpcoming: protectedProcedure
     .query(async ({ ctx }) => {
       const now = new Date();
       
-      if (ctx.session.user.role === Role.TEACHER) {
+      if (ctx.user.role === "TEACHER") {
         return ctx.db.classSession.findMany({
           where: { 
-            teacherId: ctx.session.user.id,
+            teacherId: ctx.user.id,
             scheduledAt: { gte: now }
           },
           include: { course: { select: { title: true } } },
@@ -36,7 +36,7 @@ export const sessionRouter = createTRPCRouter({
 
       // For students, find sessions belonging to courses they are enrolled in
       const enrollments = await ctx.db.enrollment.findMany({
-        where: { studentId: ctx.session.user.id, status: "ACTIVE" },
+        where: { studentId: ctx.user.id, status: "ACTIVE" },
         select: { courseId: true }
       });
 
@@ -57,6 +57,7 @@ export const sessionRouter = createTRPCRouter({
     }),
 
   // Create a new class session (Teachers/Admins only)
+  // Bug fix: was incorrectly accessing ctx.session.user
   create: protectedProcedure
     .input(
       z.object({
@@ -70,14 +71,14 @@ export const sessionRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.session.user.role === Role.STUDENT) {
+      if (ctx.user.role === "STUDENT") {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
       return ctx.db.classSession.create({
         data: {
           ...input,
-          teacherId: ctx.session.user.id,
+          teacherId: ctx.user.id,
         },
       });
     }),

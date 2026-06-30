@@ -45,7 +45,7 @@ export default function RegisterPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       router.push("/login?registered=true");
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);

@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { Search, Bell, Settings } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@qlms/ui/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@qlms/ui";
 
 export function Topbar() {
   const { data: session } = useSession();

@@ -29,10 +29,11 @@ export const paymentRouter = createTRPCRouter({
     }),
 
   // Get user's payment history
+  // Bug fix: was incorrectly accessing ctx.session.user instead of ctx.user
   getMyHistory: protectedProcedure
     .query(async ({ ctx }) => {
       return ctx.db.payment.findMany({
-        where: { userId: ctx.session.user.id },
+        where: { userId: ctx.user.id },
         orderBy: { createdAt: "desc" }
       });
     }),

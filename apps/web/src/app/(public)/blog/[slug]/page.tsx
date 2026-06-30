@@ -35,13 +35,21 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   // Very basic Tiptap JSON to HTML converter just for MVP display
   // In a real app, use `@tiptap/react` or a proper HTML renderer
-  const renderContent = (content: any) => {
-    if (!content || !content.content) return null;
-    return content.content.map((block: any, idx: number) => {
+  type TiptapTextNode = { text: string; type: string };
+  type TiptapBlock = { type: string; content?: TiptapTextNode[] };
+  type TiptapContent = { content?: TiptapBlock[] };
+
+  // Type guard: Prisma stores JSON as `JsonValue` (unknown), so we narrow it here
+  const isTiptapContent = (val: unknown): val is TiptapContent =>
+    typeof val === 'object' && val !== null && 'content' in val;
+
+  const renderContent = (content: unknown) => {
+    if (!isTiptapContent(content)) return null;
+    return content.content?.map((block: TiptapBlock, idx: number) => {
       if (block.type === 'paragraph') {
         return (
           <p key={idx}>
-            {block.content?.map((textNode: any, i: number) => textNode.text).join('')}
+            {block.content?.map((textNode: TiptapTextNode) => textNode.text).join('')}
           </p>
         );
       }

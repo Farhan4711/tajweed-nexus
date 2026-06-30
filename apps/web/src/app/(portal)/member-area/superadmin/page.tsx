@@ -1,11 +1,11 @@
 "use client";
 
 import { trpc } from "@/lib/trpc/client";
-import { Users, BookOpen, DollarSign, TrendingUp } from "lucide-react";
+import { Users, BookOpen, DollarSign } from "lucide-react";
 import Link from "next/link";
 
 export default function SuperAdminDashboard() {
-  const { data: user, isLoading: isUserLoading } = trpc.user.me.useQuery();
+  const { isLoading: isUserLoading } = trpc.user.me.useQuery();
 
   if (isUserLoading) return <div className="p-4 text-sm">Loading super admin profile...</div>;
 

@@ -8,15 +8,15 @@ import {
   Users, 
   BookOpen, 
   Calendar, 
-  Settings, 
   GraduationCap, 
   LogOut,
   CreditCard,
   FileCheck,
   Video
 } from "lucide-react";
+// Bug fix: removed unused `Settings` import
 import { signOut } from "next-auth/react";
-import { cn } from "@qlms/ui/lib/utils";
+import { cn } from "@qlms/ui";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -33,7 +33,8 @@ export function Sidebar() {
   );
 
   return (
-    <div className="w-64 bg-zinc-950 text-zinc-300 border-r border-zinc-800 flex flex-col h-screen overflow-y-auto hidden md:flex">
+    // Bug fix: "hidden md:flex" was conflicting — use "flex" and let the parent handle responsiveness
+    <div className="w-64 bg-zinc-950 text-zinc-300 border-r border-zinc-800 flex flex-col h-screen overflow-y-auto shrink-0">
       <div className="p-4 border-b border-zinc-800">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white">
           <BookOpen className="h-5 w-5 text-zinc-300" />

@@ -18,6 +18,6 @@ const handler = auth(async (req) => {
           }
         : undefined,
   });
-}) as any;
+}) as (req: Request) => Promise<Response>;
 
 export { handler as GET, handler as POST };
