@@ -64,6 +64,16 @@ This project is built as a **Turborepo Monorepo**:
 
 The application will be available at [http://localhost:3000](http://localhost:3000).
 
+### Test Accounts & Portals
+
+The application uses role-based routing. Once logged in at `/login`, the middleware automatically redirects users to their specific portal. You can test the application using the following seeded accounts (all passwords are the role name followed by `123`, e.g., `admin123`):
+
+| Role / Portal | Login Email | Password |
+| :--- | :--- | :--- |
+| **Super Admin** | `admin@qlms.com` | `admin123` |
+| **Teacher** | `ahmad@qlms.com` | `teacher123` |
+| **Student** | `student1@qlms.com` | `student123` |
+
 ---
 
 ## Development Roadmap & Progress
