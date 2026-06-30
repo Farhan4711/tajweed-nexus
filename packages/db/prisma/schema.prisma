@@ -250,8 +250,8 @@ model ClassSession {
   title         String?
   scheduledAt   DateTime
   duration      Int           @default(60) // minutes
-  dailyRoomUrl  String?
-  dailyRoomName String?
+  zoomUrl       String?
+  meetingId     String?
   recordingUrl  String?
   status        SessionStatus @default(SCHEDULED)
   isRecurring   Boolean       @default(false)
